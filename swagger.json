@@ -1,0 +1,322 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "OnlyTest API",
+    "description": "API для платформы тестирования OnlyTest",
+    "version": "v1"
+  },
+  "paths": {
+    "/Authentication/LoginWithPassword": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Validates login credentials (email and password). \r\nOn success, returns user data and an Access Token, while setting a Refresh Token in an HttpOnly cookie.",
+        "description": "Sample request:\r\n\r\n    POST /Authentication/LoginWithPassword\r\n    {\r\n        \"Email\": \"exampleEmail@mail.com\",\r\n        \"Password\": \"examplePassword\"\r\n    }",
+        "requestBody": {
+          "description": "User credentials object",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticationDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticationDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticationDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login; Refresh and Access tokens generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfoDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Login failed due to invalid credentials or user lockout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Authentication/GetNewAccessToken": {
+      "post": {
+        "tags": ["Authentication"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/Email/SendEmailVerificationLetter": {
+      "get": {
+        "tags": ["Email"],
+        "summary": "Generates and responds with email verification token",
+        "description": "Sample request:\r\n\r\n    Get /Email/SendEmailVerificationLetter?userEmail=someEmail@mail.com",
+        "parameters": [
+          {
+            "name": "userEmail",
+            "in": "query",
+            "description": "user email as a string",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "User with this email doesnt exist",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/User/GetAvailableDisciplines": {
+      "get": {
+        "tags": ["User"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisciplinesDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/VerifyTokens/LoginWithToken": {
+      "post": {
+        "tags": ["VerifyTokens"],
+        "parameters": [
+          {
+            "name": "userEmail",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "encodedToken",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthenticationDTO": {
+        "required": ["email", "password"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "description": "User email",
+            "format": "email",
+            "example": "example@mail.com"
+          },
+          "password": {
+            "minLength": 1,
+            "type": "string",
+            "description": "User password",
+            "example": "very$hard#password1_3"
+          },
+          "isPersistent": {
+            "type": "boolean",
+            "description": "boolean value to keep user signed in for longer period"
+          }
+        },
+        "additionalProperties": false,
+        "description": "User authentication data"
+      },
+      "Discipline": {
+        "required": ["title"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DisciplinesDTO": {
+        "required": ["disciplines"],
+        "type": "object",
+        "properties": {
+          "disciplines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Discipline"
+            },
+            "description": "List of disciplines available to the user"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": {}
+      },
+      "UserInfoDTO": {
+        "required": ["email", "role", "token", "username"],
+        "type": "object",
+        "properties": {
+          "username": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The full name of the user.",
+            "example": "Александра Юлия Дмитриевна"
+          },
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The email address of the user.",
+            "format": "email",
+            "example": "examplemail@mail.com"
+          },
+          "token": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The access token for the user."
+          },
+          "role": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The access level (role) of the user.",
+            "example": "Admin"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Basic information about the user."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication"
+    },
+    {
+      "name": "Email"
+    },
+    {
+      "name": "User"
+    },
+    {
+      "name": "VerifyTokens"
+    }
+  ]
+}
