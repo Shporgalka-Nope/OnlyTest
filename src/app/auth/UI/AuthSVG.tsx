@@ -19,7 +19,7 @@ export default function AuthSVG({ width = "80%", height = "80%" }: Props) {
         ease: "easeIn",
       },
     },
-  };
+  } as const;
 
   return (
     <>
