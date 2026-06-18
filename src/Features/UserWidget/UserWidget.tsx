@@ -117,7 +117,9 @@ export default function UserWidget() {
                       <tr key={user.userId}>
                         <td>{index + 1}</td>
                         <td>{user.userName}</td>
-                        <td>{roleNames[user.roleName]}</td>
+                        <td>
+                          {roleNames[user.roleName as keyof typeof roleNames]}
+                        </td>
                         <td>{user.email}</td>
 
                         <td className="d-flex flex-row justify-content-center align-items-center gap-2">

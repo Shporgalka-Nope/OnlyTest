@@ -92,7 +92,7 @@ export default function PlayQuestion({
             type="checkbox"
             name="answer"
             vertical
-            value={selectedAnswer!}
+            value={selectedAnswer! as []}
             onChange={setAnswer}
           >
             {dq.answerOptions.map((a) => (
