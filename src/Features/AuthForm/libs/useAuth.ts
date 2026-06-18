@@ -3,9 +3,10 @@ import {
   ProblemDetails,
   usePostAuthenticationLoginWithPasswordMutation,
 } from "@state/apiAutogen";
-import { addNotification } from "@/Features/SelfClosingAlert/notificationStateSlice";
-import { translateUserAuthError } from "../../SelfClosingAlert/libs/translateUserAuthError";
-import { translateNetworkError } from "@/Features/SelfClosingAlert/libs/translateNetworkError";
+import {
+  addErrNotification,
+  addNotification,
+} from "@/Features/SelfClosingAlert/notificationStateSlice";
 import { useAppDispatch, useAppSelector } from "@/state/useStoreHooks";
 import { SignInForm } from "../Entities/SignInFormFields";
 import { useEffect } from "react";
@@ -14,7 +15,7 @@ import { SerializedError } from "@reduxjs/toolkit/react";
 
 export const useAuth = () => {
   const isEmailConfirmed = useAppSelector(
-    (store) => store.user.IsEmailConfirmed,
+    (store) => store.local.user.IsEmailConfirmed,
   );
   const dispatch = useAppDispatch();
   const [login, { error }] = usePostAuthenticationLoginWithPasswordMutation();
@@ -28,18 +29,7 @@ export const useAuth = () => {
   };
 
   useEffect(() => {
-    let translatedError: string;
-    if (error) {
-      translatedError = (error as FetchBaseQueryError).data
-        ? translateUserAuthError[
-            ((error as FetchBaseQueryError).data as ProblemDetails).detail! ||
-              "Неизвестная ошибка"
-          ]
-        : translateNetworkError[(error as SerializedError).message!] ||
-          "Неизвестная ошибка";
-
-      dispatch(addNotification({ text: translatedError, variant: "warning" }));
-    }
+    dispatch(addErrNotification(error));
   }, [error]);
 
   return { handleLogin, isEmailConfirmed };

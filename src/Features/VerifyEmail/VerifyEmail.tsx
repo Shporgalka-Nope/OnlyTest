@@ -5,12 +5,12 @@ import { useEffect } from "react";
 
 export default function VerifyEmail() {
   const { onStepFinish, readData } = useDMSFContext();
-  const userEmail = readData("email");
+  const userEmail = readData?.["email"];
   const [triggerSendEmail] =
     apiAutogen.endpoints.getEmailSendEmailVerificationLetter.useLazyQuery();
 
   useEffect(() => {
-    if ((readData("isEmailVerified") as boolean) === true) {
+    if ((readData?.["isEmailVerified"] as boolean) === true) {
       onStepFinish();
     }
   }, [readData, onStepFinish]);

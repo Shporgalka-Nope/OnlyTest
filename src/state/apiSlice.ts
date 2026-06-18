@@ -5,24 +5,21 @@ import {
   fetchBaseQuery,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import { AppDispatch, RootState } from "./store";
 import { Mutex } from "async-mutex";
-import {
-  apiAutogen,
-  ProblemDetails,
-  usePostAuthenticationGetNewAccessTokenMutation,
-} from "./apiAutogen";
+import { ProblemDetails } from "./apiAutogen";
 import {
   logout,
   updateAccessToken,
 } from "@features/AuthForm/libs/userStateSlice";
+import { RootState } from "./store";
 
 const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
   baseUrl: "https://localhost:7059",
+  credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
-    const accessToken = state.user.AccessToken;
+    const accessToken = state.local.user.AccessToken;
 
     if (accessToken) {
       headers.set("authorization", `Bearer ${accessToken}`);
@@ -54,17 +51,13 @@ const baseQueryWithReauth: BaseQueryFn<
     const release = await mutex.acquire();
 
     try {
-      const state = api.getState() as RootState;
-      const userEmail = state.user.Email;
-      if (!userEmail) {
-        api.dispatch(logout());
-        return result;
-      }
-
-      const newAccessToken = await api.dispatch(
-        apiAutogen.endpoints.postAuthenticationGetNewAccessToken.initiate({
-          body: userEmail,
-        }),
+      const newAccessToken = await baseQuery(
+        {
+          url: "/Authentication/GetNewAccessToken",
+          method: "GET",
+        },
+        api,
+        extraOptions,
       );
 
       if (newAccessToken.data) {

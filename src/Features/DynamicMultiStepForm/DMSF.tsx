@@ -1,19 +1,36 @@
-"use client";
-
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ContentVariants } from "./Animations/ContentVariants";
 import { DMSFContext } from "./libs/DMSFContext";
 import useDMSF from "./libs/useDMSF";
 import React from "react";
+import { useAppDispatch, useAppSelector } from "@/state/useStoreHooks";
+import { setDmsfStep } from "./libs/dmsfSlice";
 
 interface Props {
   children: ReactNode;
   onFinish: () => void;
+  id: string;
+  persist?: boolean;
 }
 
-export default function DMSF({ children, onFinish }: Props) {
-  const [currentStep, setStep] = useState<number>(0);
+export default function DMSF({
+  children,
+  onFinish,
+  id,
+  persist = false,
+}: Props) {
+  const dispatch = useAppDispatch();
+  const sessionStep = useAppSelector((state) =>
+    state.session.dmsfState.find((s) => s.id === id),
+  );
+  const [currentStep, setStep] = useState<number>(
+    sessionStep?.currentStep || 0,
+  );
+  useEffect(() => {
+    setStep(sessionStep?.currentStep || 0);
+  }, [sessionStep]);
+
   const [animDirection, setAnimDirection] = useState<number>(1); //1 - forwards, 2 - backwards
 
   const HandleNext = () => {
@@ -22,7 +39,9 @@ export default function DMSF({ children, onFinish }: Props) {
       return;
     }
     setAnimDirection(1);
-    setStep((prev) => prev + 1);
+    const newStep = currentStep + 1;
+    setStep(newStep);
+    if (persist) dispatch(setDmsfStep({ id: id, currentStep: newStep }));
   };
 
   const HandlePrev = () => {
@@ -30,11 +49,17 @@ export default function DMSF({ children, onFinish }: Props) {
       return;
     }
     setAnimDirection(-1);
-    setStep((prev) => prev - 1);
+    const newStep = currentStep - 1;
+    setStep(newStep);
+    if (persist) dispatch(setDmsfStep({ id: id, currentStep: newStep }));
   };
 
   const steps = React.Children.toArray(children);
-  const initialContextValues = useDMSF(HandleNext);
+  const initialContextValues = useDMSF({
+    HandleNext: HandleNext,
+    HandleReverse: HandlePrev,
+    id,
+  });
 
   return (
     <div className="w-100 h-100 overflow-x-hidden p-4">

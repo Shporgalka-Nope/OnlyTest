@@ -15,7 +15,6 @@ const userStateSlice = createSlice({
   initialState: userStateInitial as User,
   reducers: {
     logout: (state) => {
-      console.log("LOGOUT");
       return userStateInitial;
     },
     updateAccessToken: (state, action: PayloadAction<string>) => {

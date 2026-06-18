@@ -1,22 +1,30 @@
 import { useState } from "react";
 import { FormContext } from "./DMSFContext";
 
-export default function useDMSF(HandleNext: () => void) {
+interface Props {
+  HandleNext: () => void;
+  HandleReverse: () => void;
+  id: string;
+}
+
+export default function useDMSF({ HandleNext, HandleReverse }: Props) {
   const [contextData, setContextData] = useState<Record<string, any>>();
 
   const initialContextValues: FormContext = {
+    readData: contextData,
+
     writeData(formValue) {
       setContextData((prev: any) => {
         return { ...prev, ...formValue };
       });
     },
 
-    readData(dataType: string) {
-      return contextData?.[dataType];
-    },
-
     onStepFinish() {
       HandleNext();
+    },
+
+    onStepReverse() {
+      HandleReverse();
     },
   };
 

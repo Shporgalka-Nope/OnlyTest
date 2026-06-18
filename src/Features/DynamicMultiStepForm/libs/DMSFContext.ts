@@ -1,13 +1,15 @@
-import { createContext, useContext, useState } from "react";
+import { createContext } from "react";
 
 export interface FormContext {
   writeData: (formValue: Record<string, any>) => void;
-  readData: (dataType: string) => any | undefined;
+  readData: Record<string, any> | undefined;
   onStepFinish: () => void;
+  onStepReverse: () => void;
 }
 
 export const DMSFContext = createContext<FormContext>({
   writeData: () => {},
-  readData: () => undefined,
+  readData: {},
   onStepFinish: () => {},
+  onStepReverse: () => {},
 });

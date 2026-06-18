@@ -7,11 +7,14 @@ import { AnimatePresence } from "motion/react";
 
 export default function AlertContainer() {
   const notificationList = useSelector<RootState, Notification[]>(
-    (state) => state.notification,
+    (state) => state.local.notification,
   );
 
   return (
-    <div className="fixed-top w-100 d-flex flex-column align-items-center pt-2">
+    <div
+      className="fixed-top w-100 d-flex flex-column align-items-center pt-2"
+      style={{ zIndex: "9999" }}
+    >
       <AnimatePresence>
         {notificationList.map((notif) => (
           <AlertDismissable
