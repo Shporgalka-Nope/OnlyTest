@@ -15,7 +15,7 @@ import { RootState } from "./store";
 
 const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://localhost:7059",
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://api:80",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
